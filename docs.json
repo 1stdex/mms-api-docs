@@ -3,7 +3,7 @@
   "favicon": "/favicon.ico",
   "theme": "mint",
   "colors": {
-    "primary": "lab(66.9756 -58.27 19.5419)"
+    "primary": "#00b972"
   },
   "navigation": [
     {

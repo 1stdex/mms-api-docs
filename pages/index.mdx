@@ -1,0 +1,28 @@
+---
+title: "Welcome"
+description: "End-to-end guide for quantitative market makers integrating with the 1st DEX central‑limit‑order‑book (CLOB)."
+---
+
+# 1st DEX — Market Maker API
+
+These docs cover how to **quote**, **update**, and **risk‑manage** orders programmatically using:
+
+- The on‑chain **Controller** contract (single entrypoint) to batch trading actions.
+- The **Subgraph** to read books, orders, and fills with low latency.
+
+> **Architecture:** each *pair* has **two order books**, one per direction. Orders are denominated in **units** (multiples of `unitSize`) at discrete **ticks**. See [Core concepts](/concepts/core).
+
+## What’s different vs AMM DEXes?
+
+- **Price–time priority** instead of pools and curves.
+- **Quote‑collateralized** makers: quote is locked when you `MAKE`, released when you `CANCEL` or after `CLAIM`.
+- **Fee model** via **providers** and (optional) referrers.
+- **Single batch entrypoint**: all actions go through `Controller.execute(...)` so you can atomically make/take/cancel/claim in one tx.
+
+## What you’ll build
+
+- A minimal TS bot that posts/cancels quotes.
+- Subgraph queries for **book depth**, **your live orders**, and **fills**.
+- Safe patterns around **distributions** (claim/cancel automation).
+
+Get started in **[Quickstart](/guides/quickstart)**.

@@ -1,0 +1,53 @@
+---
+title: "Query the subgraph"
+description: "Exact schema and working queries for books, depth, and your orders."
+---
+
+The subgraph exposes typed entities. Below are working examples aligned with the schema.
+
+### Books (paginate)
+
+```graphql
+query Books($first: Int!, $skip: Int!) {
+  books(first: $first, skip: $skip, orderBy: id) {
+    id
+    base { id symbol decimals }
+    quote { id symbol decimals }
+    unitSize
+    makerPolicy { fee isFeeInQuote }
+    takerPolicy { fee isFeeInQuote }
+  }
+}
+```
+
+### Depth by price level
+
+```graphql
+query Depth($book: ID!, $first: Int!) {
+  book(id: $book) {
+    id
+    depths(first: $first, orderBy: tick, orderDirection: desc) {
+      tick
+      unitAmount
+      baseAmount
+      quoteAmount
+    }
+  }
+}
+```
+
+### Open orders for a user in a book
+
+```graphql
+query MyOpenOrdersInBook($owner: Bytes!, $book: ID!) {
+  openOrders(where: { owner: $owner, book: $book }, orderBy: tick, orderDirection: desc) {
+    id
+    orderIndex
+    tick
+    unitAmount
+    claimableQuoteAmount
+    createdAt
+  }
+}
+```
+

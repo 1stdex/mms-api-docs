@@ -1,0 +1,18 @@
+---
+title: "Books, ticks & units"
+description: "How to reason about price levels (ticks) and sizes (units)."
+---
+
+## Units
+
+Every book has a fixed `unitSize` (an amount of **base** for that book). All maker sizes are expressed in **units** (uint64). Actual base/quote amounts are derived from the `unitSize` and the tick’s price.
+
+## Ticks
+
+Ticks are discrete signed integers (`int24`). Conversions:
+
+- `int24 MIN_TICK = -8_388_608`, `MAX_TICK = 8_388_607`.
+- ABI type is `int24` when encoding parameters.
+
+> Implementation note: see `Tick.sol` for the exact definition.
+

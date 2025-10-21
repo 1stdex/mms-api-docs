@@ -1,0 +1,37 @@
+---
+title: "Core concepts"
+description: "Books, providers, units, ticks, and the Controller entrypoint."
+---
+
+## Books
+
+- Two books per pair: **base→quote** (sell base) and **quote→base** (sell quote). We refer to them by a deterministic `BookId`.
+- Each book is defined by a **BookKey**: `(base, quote, unitSize, makerPolicy, takerPolicy)`.
+- Orders in a book share the same `unitSize` and fee policies. Units are **integers**; the notional is `unit * unitSize` in the *book’s base currency*.
+
+## Ticks
+
+- Price levels are discrete **ticks** with type `Tick` (signed 24‑bit integer). Ticks are **global** (shared across books).
+
+## Providers & referrers
+
+- Every order must set a **provider** address:
+  - In the **sell‑base** book, use the **sell provider**.
+  - In the **sell‑quote** book, use the **buy provider**.
+- `referrer` is optional; leave as `0x0000000000000000000000000000000000000000` unless you have a program.
+
+## Controller entrypoint
+
+All contract calls are funneled via the **Controller**. The single method is:
+
+```solidity
+function execute(
+  Action[] calldata actionList,
+  bytes[] calldata paramsDataList,
+  ERC20PermitParams[] calldata erc20PermitParamsList,
+  uint64 deadline
+) external returns (OrderId[] memory ids);
+```
+
+The `paramsDataList` items are ABI‑encoded structs for each action. See [Controller reference](/reference/controller).
+

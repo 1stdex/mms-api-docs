@@ -1,0 +1,82 @@
+---
+title: "Place & cancel orders"
+description: "MAKE, TAKE, SPEND, CLAIM, and CANCEL through the Controller.execute batching API."
+---
+
+All trading actions are batched via `Controller.execute`. For each item in `actionList` you provide an **ABI‑encoded** params struct in `paramsDataList`.
+
+> **Providers:** Use the **buy provider** when you sell quote / buy base; use the **sell provider** when you sell base. Leave `referrer` empty unless instructed.
+
+### Structs (current interface)
+
+- `MakeOrderParams(id:uint192, tick:int24, quoteAmount:uint256, provider:address, referrer:address, owner:address)`
+- `LimitOrderParams(id:uint192, tick:int24, quoteAmount:uint256, makeProvider:address, makeReferrer:address, takeProvider:address, takeReferrer:address, owner:address)`
+- `TakeOrderParams(id:uint192, limitPrice:uint256, quoteAmount:uint256, maxBaseAmount:uint256, provider:address, referrer:address, owner:address)`
+- `SpendOrderParams(id:uint192, limitPrice:uint256, baseAmount:uint256, minQuoteAmount:uint256, provider:address, referrer:address, owner:address)`
+- `ClaimOrderParams(id:uint256, owner:address)`
+- `CancelOrderParams(id:uint256, leftQuoteAmount:uint256, owner:address)`
+
+> A pending PR will remove `owner` from these structs and infer it from the **locker** (see Reference). When that merges, drop the `owner` field in the encodings.
+
+#### MAKE (post a limit)
+
+```ts
+const makeTypes = [
+  { name: 'id', type: 'uint192' },
+  { name: 'tick', type: 'int24' },
+  { name: 'quoteAmount', type: 'uint256' },
+  { name: 'provider', type: 'address' },
+  { name: 'referrer', type: 'address' },
+  { name: 'owner', type: 'address' },
+] as const;
+
+const makeData = encodeAbiParameters(makeTypes, [
+  bookId, tick, quoteAmount, provider, ZERO, owner
+]);
+
+await writeExecute([Action.MAKE], [makeData]);
+```
+
+#### CANCEL (full or partial)
+
+`leftQuoteAmount` is the remaining quote you want **after** cancellation (0 for full).
+
+```ts
+const cancelTypes = [
+  { name: 'id', type: 'uint256' }, // OrderId
+  { name: 'leftQuoteAmount', type: 'uint256' },
+  { name: 'owner', type: 'address' },
+] as const;
+
+const cancelData = encodeAbiParameters(cancelTypes, [orderId, 0n, owner]);
+await writeExecute([Action.CANCEL], [cancelData]);
+```
+
+#### CLAIM (settle a filled maker)
+
+```ts
+const claimTypes = [
+  { name: 'id', type: 'uint256' },
+  { name: 'owner', type: 'address' },
+] as const;
+
+const claimData = encodeAbiParameters(claimTypes, [orderId, owner]);
+await writeExecute([Action.CLAIM], [claimData]);
+```
+
+#### TAKE / SPEND
+
+Use when acting as a taker. These encode similarly using `TakeOrderParams` / `SpendOrderParams` above.
+
+```ts
+const takeTypes = [
+  { name: 'id', type: 'uint192' },
+  { name: 'limitPrice', type: 'uint256' },
+  { name: 'quoteAmount', type: 'uint256' },
+  { name: 'maxBaseAmount', type: 'uint256' },
+  { name: 'provider', type: 'address' },
+  { name: 'referrer', type: 'address' },
+  { name: 'owner', type: 'address' },
+] as const;
+```
+

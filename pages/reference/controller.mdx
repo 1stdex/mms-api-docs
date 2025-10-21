@@ -1,0 +1,89 @@
+---
+title: "Controller (on‑chain)"
+description: "Single entrypoint API and parameter encodings used by market makers."
+---
+
+All interactions go through `Controller.execute`. The enum and structs below reflect the current `main` branch.
+
+```solidity
+enum Action {
+  OPEN,
+  MAKE,
+  LIMIT,
+  TAKE,
+  SPEND,
+  CLAIM,
+  CANCEL
+}
+
+function execute(
+  Action[] calldata actionList,
+  bytes[] calldata paramsDataList,
+  ERC20PermitParams[] calldata erc20PermitParamsList,
+  uint64 deadline
+) external returns (OrderId[] memory ids);
+```
+
+### Structs (IController)
+
+```solidity
+struct MakeOrderParams {
+  BookId id;
+  Tick tick;
+  uint256 quoteAmount;
+  address provider;
+  address referrer;
+  address owner;      // to be dropped in a future update
+}
+
+struct LimitOrderParams {
+  BookId id;
+  Tick tick;
+  uint256 quoteAmount;
+  address makeProvider;
+  address makeReferrer;
+  address takeProvider;
+  address takeReferrer;
+  address owner;      // to be dropped in a future update
+}
+
+struct TakeOrderParams {
+  BookId id;
+  uint256 limitPrice;
+  uint256 quoteAmount;
+  uint256 maxBaseAmount;
+  address provider;
+  address referrer;
+  address owner;      // to be dropped in a future update
+}
+
+struct SpendOrderParams {
+  BookId id;
+  uint256 limitPrice;
+  uint256 baseAmount;
+  uint256 minQuoteAmount;
+  address provider;
+  address referrer;
+  address owner;      // to be dropped in a future update
+}
+
+struct ClaimOrderParams {
+  OrderId id;
+  address owner;      // to be dropped in a future update
+}
+
+struct CancelOrderParams {
+  OrderId id;
+  uint256 leftQuoteAmount;
+  address owner;      // to be dropped in a future update
+}
+```
+
+### Encoding schemas
+
+When you build `paramsDataList[i]`, encode the fields above in order using ABI parameter types:
+
+- `BookId` → `uint192`
+- `OrderId` → `uint256`
+- `Tick` → `int24`
+

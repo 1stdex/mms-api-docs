@@ -1,0 +1,9 @@
+---
+title: "Distributions & auto–actions"
+description: "What happens on distributions and how it affects maker risk."
+---
+
+- **Claiming:** distributions move owed base/quote so makers can `CLAIM` their proceeds.
+- **Auto‑cancel:** only **sell orders that became under‑collateralized after a distribution** are **auto‑cancelled** during the distribution process.
+- **Pause semantics:** books may be **paused** while a distribution runs; do not assume liveness during that window.
+

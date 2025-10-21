@@ -1,0 +1,52 @@
+---
+title: "Subgraph (GraphQL schema)"
+description: "Types you will query from bots."
+---
+
+### Core types
+
+```graphql
+type Token {
+  id: ID!
+  name: String!
+  symbol: String!
+  decimals: Int!
+}
+
+type FeePolicy {
+  id: ID!
+  fee: BigDecimal!
+  isFeeInQuote: Boolean!
+}
+
+type Book {
+  id: ID!
+  base: Token!
+  quote: Token!
+  unitSize: BigInt!
+  makerPolicy: FeePolicy!
+  takerPolicy: FeePolicy!
+  depths: [Depth!]! @derivedFrom(field: "book")
+  openOrders: [OpenOrder!]! @derivedFrom(field: "book")
+}
+
+type Depth {
+  id: ID!
+  book: Book!
+  tick: BigInt!
+  unitAmount: BigInt!
+  baseAmount: BigInt!
+  quoteAmount: BigInt!
+}
+
+type OpenOrder {
+  id: ID!
+  book: Book!
+  owner: Bytes!
+  tick: BigInt!
+  orderIndex: Int!
+  unitAmount: BigInt!
+  claimableQuoteAmount: BigDecimal!
+  createdAt: Int!
+}
+```

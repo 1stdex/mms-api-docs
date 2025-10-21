@@ -1,0 +1,119 @@
+---
+title: "Quickstart"
+description: "Post/cancel a quote using the Controller and read it from the subgraph."
+---
+
+## Prerequisites
+
+- Node.js 18+
+- `viem` or `ethers` for ABI encoding / RPC
+- RPC URL + private key with funds on the target network
+- Contract addresses (placeholders here; see [Addresses](/reference/addresses))
+
+```ts
+// install
+npm i viem
+```
+
+## Constants
+
+```ts
+// Controller ABI fragment and enums you need
+export enum Action {
+  OPEN = 0,
+  MAKE = 1,
+  LIMIT = 2,
+  TAKE = 3,
+  SPEND = 4,
+  CLAIM = 5,
+  CANCEL = 6,
+}
+
+export const controllerAbi = [
+  {
+    name: 'execute',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'actionList', type: 'uint8[]' },           // Action[]
+      { name: 'paramsDataList', type: 'bytes[]' },       // abi.encode of each params struct
+      { name: 'erc20PermitParamsList', type: 'tuple[]' },// ERC20PermitParams[] (optional; pass [] if unused)
+      { name: 'deadline', type: 'uint64' },
+    ],
+    outputs: [{ name: 'ids', type: 'uint256[]' }], // OrderId[]
+  },
+] as const;
+```
+
+## Make then cancel
+
+```ts
+import { createWalletClient, http, parseUnits, encodeAbiParameters } from 'viem';
+
+const controller = '0xController';          // placeholder
+const signer = createWalletClient({ /* transport & account */ });
+
+// Struct used by Action.MAKE (IController.MakeOrderParams)
+const makeTypes = [
+  { name: 'id', type: 'uint192' },      // BookId
+  { name: 'tick', type: 'int24' },      // Tick
+  { name: 'quoteAmount', type: 'uint256' },
+  { name: 'provider', type: 'address' },
+  { name: 'referrer', type: 'address' },
+  { name: 'owner', type: 'address' },   // current interface
+] as const;
+
+const cancelTypes = [
+  { name: 'id', type: 'uint256' },      // OrderId
+  { name: 'leftQuoteAmount', type: 'uint256' },
+  { name: 'owner', type: 'address' },
+] as const;
+
+const ZERO = '0x0000000000000000000000000000000000000000';
+
+const bookId = 1n;        // replace with real BookId
+const tick = 0;           // int
+const makeQuote = parseUnits('50', 6);  // e.g., 50 USDC
+const provider = '0xBuyOrSellProvider';  // set correctly per book
+const owner = '0xYourEOA';               // until PR #46 merges
+
+const makeParams = encodeAbiParameters(
+  makeTypes,
+  [bookId, tick, makeQuote, provider, ZERO, owner],
+);
+
+const deadline = BigInt(Math.floor(Date.now() / 1000) + 600); // +10m
+
+const { result: [orderId] } = await signer.writeContract({
+  address: controller,
+  abi: controllerAbi,
+  functionName: 'execute',
+  args: [[Action.MAKE], [makeParams], [], deadline],
+});
+
+// Later, cancel fully (leftQuoteAmount = 0)
+const cancelParams = encodeAbiParameters(cancelTypes, [orderId, 0n, owner]);
+
+await signer.writeContract({
+  address: controller,
+  abi: controllerAbi,
+  functionName: 'execute',
+  args: [[Action.CANCEL], [cancelParams], [], deadline],
+});
+```
+
+## Read your live order
+
+Use the subgraph:
+
+```graphql
+query MyOpenOrders($owner: Bytes!, $book: ID!) {
+  openOrders(where: { owner: $owner, book: $book }) {
+    id
+    orderIndex
+    tick
+    unitAmount
+    claimableQuoteAmount
+  }
+}
+```

@@ -1,70 +1,37 @@
 {
-  "name": "1st DEX \u2013 Market Maker API",
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "1st DEX – Market Maker API",
   "favicon": "/favicon.ico",
   "theme": "mint",
   "colors": {
     "primary": "#00b972"
   },
-  "navigation": [
-    {
-      "group": "Overview",
-      "pages": [
-        {
-          "name": "Welcome",
-          "path": "index"
-        },
-        {
-          "name": "Core concepts",
-          "path": "concepts/core"
-        },
-        {
-          "name": "Books, ticks & units",
-          "path": "concepts/books-ticks-units"
-        }
-      ]
-    },
-    {
-      "group": "Guides",
-      "pages": [
-        {
-          "name": "Quickstart",
-          "path": "guides/quickstart"
-        },
-        {
-          "name": "Place & cancel orders",
-          "path": "guides/place-cancel"
-        },
-        {
-          "name": "Query the subgraph",
-          "path": "guides/query-subgraph"
-        }
-      ]
-    },
-    {
-      "group": "Reference",
-      "pages": [
-        {
-          "name": "Contracts (Controller)",
-          "path": "reference/controller"
-        },
-        {
-          "name": "Subgraph schema",
-          "path": "reference/subgraph"
-        },
-        {
-          "name": "Addresses & networks",
-          "path": "reference/addresses"
-        }
-      ]
-    },
-    {
-      "group": "Appendix",
-      "pages": [
-        {
-          "name": "Distributions & auto\u2013actions",
-          "path": "appendix/distributions"
-        }
-      ]
-    }
-  ]
+  "navigation": {
+    "groups": [
+      {
+        "group": "Overview",
+        "pages": ["index", "concepts/core", "concepts/books-ticks-units"]
+      },
+      {
+        "group": "Guides",
+        "pages": [
+          "guides/quickstart",
+          "guides/place-cancel",
+          "guides/query-subgraph"
+        ]
+      },
+      {
+        "group": "Reference",
+        "pages": [
+          "reference/controller",
+          "reference/subgraph",
+          "reference/addresses"
+        ]
+      },
+      {
+        "group": "Appendix",
+        "pages": ["appendix/distributions"]
+      }
+    ]
+  }
 }
